@@ -55,7 +55,6 @@
                 <?php else : ?>
                     <a class="p-2 text-dark" href="/account/login">Авторизация</a>
                 <?php endif; ?>
-                <a class="p-2 text-dark" href="/task">Задача</a>
             </nav>
         </header>
         <main class="container">

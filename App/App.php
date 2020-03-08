@@ -33,7 +33,7 @@ class App
         if($e instanceof App\InvalidRouteException) {
             echo static::$kernel->launchAction('Error', 'error404', [$e->getMessage()]);
         } else {
-            echo static::$kernel->launchAction('Error', 'error500', [$e]);
+            echo static::$kernel->launchAction('Error', 'error500', [$e->getMessage(), $e->getLine(), $e->getFile()]);
         }
     }
 

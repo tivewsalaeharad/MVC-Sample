@@ -23,29 +23,7 @@ App::$db->close();
 $total_rows = count($db_result);
 $max_page = ceil($total_rows/3);
 $admin = isset($_SESSION['logged_user']) && $_SESSION['logged_user']['login'] == 'admin';
-
 ?>
-
-<?php switch ($params[0]) {
-    case 'added':
-        echo '<div class="alert alert-info" role="alert">Новая задача успешно добавлена</div>';
-        break;
-    case 'login':
-        echo '<div class="alert alert-info" role="alert">Вы успешно авторизовались</div>';
-        break;
-    case 'logout':
-        echo '<div class="alert alert-info" role="alert">Вы вышли из аккаунта</div>';
-        break;
-    case 'denied':
-        echo '<div class="alert alert-danger" role="alert">Доступ запрещён. Неверно введены логин и/или пароль</div>';
-        break;
-    case 'changed':
-        echo '<div class="alert alert-info" role="alert">Данные успешно изменены</div>';
-        break;
-    case 'updated':
-        echo '<div class="alert alert-info" role="alert">С возвращением! Внесённые изменения сохранены</div>';
-        break;
-}?>
 
 <table class="table table-hover">
   <thead>
@@ -141,3 +119,23 @@ $admin = isset($_SESSION['logged_user']) && $_SESSION['logged_user']['login'] ==
     </ul>
 </nav>
 <? endif; ?>
+<?php switch ($params[0]) {
+    case 'added':
+        echo '<div class="alert alert-info" role="alert">Новая задача успешно добавлена</div>';
+        break;
+    case 'login':
+        echo '<div class="alert alert-info" role="alert">Вы успешно авторизовались</div>';
+        break;
+    case 'logout':
+        echo '<div class="alert alert-info" role="alert">Вы вышли из аккаунта</div>';
+        break;
+    case 'denied':
+        echo '<div class="alert alert-danger" role="alert">Доступ запрещён. Неверно введены логин и/или пароль</div>';
+        break;
+    case 'changed':
+        echo '<div class="alert alert-info" role="alert">Данные успешно изменены</div>';
+        break;
+    case 'updated':
+        echo '<div class="alert alert-info" role="alert">С возвращением! Внесённые изменения сохранены</div>';
+        break;
+}?>
