@@ -7,31 +7,61 @@ use App;
 class Db
 {
 
-    public $pdo;
+    private $link;
+    private $error;
 
-    public function __construct()
+    public function init()
     {
-        $settings = $this->getPDOSettings();
-        $this->pdo = new \PDO($settings['dsn'], $settings['user'], $settings['pass'], null);
+        $settings = $this->getSettings();
+        $this->link = mysqli_connect($settings['host'], $settings['user'], $settings['password'], $settings['dbname']);
+        if (mysqli_connect_errno()) {
+          $this->error = mysqli_connect_error();
+        } else {
+          $this->error = null;
+          $this->createTaskIfNotExist();
+        }
     }
 
-    protected function getPDOSettings()
+    protected function getSettings()
     {
         $config = include ROOTPATH.DIRECTORY_SEPARATOR.'Config'.DIRECTORY_SEPARATOR.'Db.php';
-        $result['dsn'] = "{$config['type']}:host={$config['host']};dbname={$config['dbname']};charset={$config['charset']}";
+        $result['host'] = $config['host'];
+        $result['dbname'] = $config['dbname'];
         $result['user'] = $config['user'];
-        $result['pass'] = $config['pass'];
+        $result['password'] = $config['password'];
         return $result;
     }
 
-    public function execute($query, array $params=null)
-    {
-        if(is_null($params)){
-            $stmt = $this->pdo->query($query);
-            return $stmt->fetchAll();
-        }
-        $stmt = $this->pdo->prepare($query);
-        $stmt->execute($params);
-        return $stmt->fetchAll();
+    public function execute($query) {
+        if ($this->error) return null;
+        $result = mysqli_query($this->link, $query);
+        return mysqli_fetch_all($result, MYSQLI_ASSOC);
     }
+
+    public function addRow($user_name, $email, $content) {
+        $query = "INSERT INTO task (user_name, email, content, edited, done)
+            VALUES ('$user_name', '$email', '$content', 0, 0)";
+        if ($stmt = mysqli_prepare($this->link, $query)) {
+            mysqli_stmt_execute($stmt);
+        }
+    }
+
+    public function close() {
+        mysqli_close($this->link);
+    }
+
+    private function createTaskIfNotExist() {
+        $query = "CREATE TABLE IF NOT EXISTS task (
+            id INTEGER PRIMARY KEY NOT NULL AUTO_INCREMENT,
+            user_name VARCHAR(50) NOT NULL,
+            email VARCHAR(50) NOT NULL,
+            content VARCHAR(50) NOT NULL,
+            edited BOOLEAN NOT NULL,
+            done BOOLEAN NOT NULL
+        )";
+        if ($stmt = mysqli_prepare($this->link, $query)) {
+            mysqli_stmt_execute($stmt);
+        }
+    }
+
 }

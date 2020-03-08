@@ -3,8 +3,8 @@
 return [
 'type' => 'mysql',
 'host' => 'localhost',
-'dbname' => 'gotlib',
+'dbname' => 'mvcsample',
 'charset' => 'utf8',
 'user' => 'root',
-'pass' => ''
+'password' => ''
 ];

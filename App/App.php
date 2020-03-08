@@ -30,10 +30,10 @@ class App
 
     public static function handleException (Throwable $e)
     {
-        if(in_array($e->getMessage(), ['no_file', 'no_class', 'no_method'])) {
+        if($e instanceof App\InvalidRouteException) {
             echo static::$kernel->launchAction('Error', 'error404', [$e->getMessage()]);
         } else {
-            echo static::$kernel->launchAction('Error', 'error500', [$e->getMessage()]);
+            echo static::$kernel->launchAction('Error', 'error500', [$e]);
         }
     }
 
