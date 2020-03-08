@@ -1,9 +1,8 @@
 <?php
-if ($params == ['added']) {
-    $column = 'user_name';
-    $direction = 'ASC';
-    $page = 1;
-    $added = true;
+if (in_array($params[0], ['added', 'login', 'logout', 'denied', 'changed', 'updated'])) {
+    $column = $_SESSION['home_state']['column'];
+    $direction = $_SESSION['home_state']['direction'];
+    $page = $_SESSION['home_state']['page'];
 } else {
     $column = array_shift($params);
     $column = $column ? $column : 'user_name';
@@ -11,22 +10,47 @@ if ($params == ['added']) {
     $direction = $direction ? $direction : 'ASC';
     $page = array_shift($params);
     $page = $page ? $page : 1;
-    $added = false;
+    $_SESSION['home_state'] = array(
+        'column' => $column,
+        'direction' => $direction,
+        'page' => $page
+    );
 }
 App::$db->init();
-$db_result = App::$db->execute("SELECT * FROM task ORDER BY $column $direction");
+$db_result = App::$db->getAllTasks($column, $direction);
 App::$db->close();
+
+$total_rows = count($db_result);
+$max_page = ceil($total_rows/3);
+$admin = isset($_SESSION['logged_user']) && $_SESSION['logged_user']['login'] == 'admin';
 
 ?>
 
-<?php if ($added):?>
-    <div class="alert alert-info" role="alert">Новая задача успешно добавлена</div>
-<?php endif; ?>
+<?php switch ($params[0]) {
+    case 'added':
+        echo '<div class="alert alert-info" role="alert">Новая задача успешно добавлена</div>';
+        break;
+    case 'login':
+        echo '<div class="alert alert-info" role="alert">Вы успешно авторизовались</div>';
+        break;
+    case 'logout':
+        echo '<div class="alert alert-info" role="alert">Вы вышли из аккаунта</div>';
+        break;
+    case 'denied':
+        echo '<div class="alert alert-danger" role="alert">Доступ запрещён. Неверно введены логин и/или пароль</div>';
+        break;
+    case 'changed':
+        echo '<div class="alert alert-info" role="alert">Данные успешно изменены</div>';
+        break;
+    case 'updated':
+        echo '<div class="alert alert-info" role="alert">С возвращением! Внесённые изменения сохранены</div>';
+        break;
+}?>
 
 <table class="table table-hover">
   <thead>
     <tr>
-      <th scope="col">
+      <th scope="col" style="width: 20%">
           Имя пользователя
           <button onclick="sortPaginationSwitch('user_name',
           '<?=$column=='user_name'&&$direction=='ASC'?'DESC':'ASC'?>', <?=$page?>);">
@@ -35,7 +59,7 @@ App::$db->close();
               </span>
           </button>
       </th>
-      <th scope="col">
+      <th scope="col" style="width: 15%">
           E-mail
           <button onclick="sortPaginationSwitch('email',
           '<?=$column=='email'&&$direction=='ASC'?'DESC':'ASC'?>', <?=$page?>);">
@@ -44,9 +68,25 @@ App::$db->close();
               </span>
           </button>
       </th>
-      <th scope="col">Текст задачи</th>
-      <th scope="col">Изменено администратором</th>
-      <th scope="col">
+      <th scope="col" style="width: 25%">
+          Текст задачи
+          <button onclick="sortPaginationSwitch('content',
+          '<?=$column=='content'&&$direction=='ASC'?'DESC':'ASC'?>', <?=$page?>);">
+              <span>
+                  <img src="/Images/<?=$column=='content'?$direction:'nosort'?>.svg">
+              </span>
+          </button>
+      </th>
+      <th scope="col" style="width: 15%">
+          Изменено
+          <button onclick="sortPaginationSwitch('edited',
+          '<?=$column=='edited'&&$direction=='ASC'?'DESC':'ASC'?>', <?=$page?>);">
+              <span>
+                  <img src="/Images/<?=$column=='edited'?$direction:'nosort'?>.svg">
+              </span>
+          </button>
+      </th>
+      <th scope="col" style="width: 25%">
           Статус
           <button onclick="sortPaginationSwitch('done',
           '<?=$column=='done'&&$direction=='ASC'?'DESC':'ASC'?>', <?=$page?>);">
@@ -64,13 +104,19 @@ App::$db->close();
             <td><?=$row['user_name']?></td>
             <td><?=$row['email']?></td>
             <td><?=$row['content']?></td>
-            <td><?=$row['edited']?'Да':'Нет'?></td>
-            <td><?=$row['done']?'Выполнено':'Не выполнено'?></td>
+            <td>
+                <?=$row['edited']?'Да':'Нет'?>
+                <?php if($admin) : ?>(<a href="/editTask/edit/<?=$row['id']?>">Править</a>)<?php endif; ?>
+            </td>
+            <td>
+                <?=$row['done']?'Выполнено':'Не выполнено'?>
+                <?php if($admin && !$row['done']) : ?>(<a href="/editTask/fulfil/<?=$row['id']?>">Выполнить</a>)<?php endif; ?>
+            </td>
         </tr>
     <?php endfor; ?>
   </tbody>
 </table>
-<? if (count ($db_result) > 3) :?>
+<? if ($total_rows > 3) :?>
 <nav aria-label="..." class="row d-flex justify-content-center">
     <ul class="pagination">
         <li class="page-item <?=$page == 1 ? 'disabled' : ''?>">

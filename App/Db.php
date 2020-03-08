@@ -32,10 +32,16 @@ class Db
         return $result;
     }
 
-    public function execute($query) {
+    public function getAllTasks($column, $direction) {
         if ($this->error) return null;
-        $result = mysqli_query($this->link, $query);
+        $result = mysqli_query($this->link, "SELECT * FROM task ORDER BY $column $direction");
         return mysqli_fetch_all($result, MYSQLI_ASSOC);
+    }
+
+    public function getOneTask($id) {
+        if ($this->error) return null;
+        $result = mysqli_query($this->link, "SELECT * FROM task WHERE id = $id");
+        return mysqli_fetch_array($result, MYSQLI_ASSOC);
     }
 
     public function addRow($user_name, $email, $content) {
@@ -44,6 +50,21 @@ class Db
         if ($stmt = mysqli_prepare($this->link, $query)) {
             mysqli_stmt_execute($stmt);
         }
+    }
+
+    public function performChanges() {
+        foreach ($_SESSION['edit_cache'] as $id => $changes) {
+            $change_expression = '';
+            foreach ($changes as $key => $value) {
+                if ($change_expression) $change_expression .= ', ';
+                $change_expression .= "$key = '$value'";
+            }
+            $query = "UPDATE task SET $change_expression WHERE id = $id";
+            if ($stmt = mysqli_prepare($this->link, $query)) {
+                mysqli_stmt_execute($stmt);
+            }
+        }
+        unset($_SESSION['edit_cache']);
     }
 
     public function close() {

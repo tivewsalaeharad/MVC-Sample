@@ -2,14 +2,14 @@
 <html lang="ru">
     <head>
         <meta charset="utf-8">
-        <title>Обо мне</title>
+        <title>Тестовое задание</title>
         <meta name="viewport" content="width=device-width,initial-scale=1">
         <link href="/Css/style_layout.css" rel="stylesheet" type="text/css">
         <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet">
         <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
     </head>
     <body>
-        <div id="incorrectEMailModal" class="modal" tabindex="-1" role="dialog">
+        <div id="errorModal" class="modal" tabindex="-1" role="dialog">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -51,9 +51,9 @@
                 <a class="p-2 text-dark" href="/">Перечень задач</a>
                 <a class="p-2 text-dark" href="/newTask">Новая задача</a>
                 <?php if (isset($_SESSION['logged_user'])) : ?>
-                    <a class="p-2 text-dark" href="/logout">Выйти</a>
+                    <a class="p-2 text-dark" href="/account/logout">Выйти</a>
                 <?php else : ?>
-                    <a class="p-2 text-dark" href="/login">Войти</a>
+                    <a class="p-2 text-dark" href="/account/login">Авторизация</a>
                 <?php endif; ?>
                 <a class="p-2 text-dark" href="/task">Задача</a>
             </nav>
@@ -68,19 +68,33 @@
                 $('#newTaksForm').submit(function (e) {
                     var errors = '';
                     if ($('#newTaskUserName').val() == '') {
-                        errors += 'Заполните имя пользователя<br>';
+                        errors += 'Заполните имя пользователя!<br>';
                     }
                     if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test($('#newTaskEMail').val())) {
-                        errors += 'Введите правильный адрес электронной почты<br>';
+                        errors += 'Введите правильный адрес электронной почты!<br>';
                     }
                     if ($('#newTaskDetails').val() == '') {
-                        errors += 'Заполните текст задачи<br>';
+                        errors += 'Заполните текст задачи!<br>';
                     }
                     if (errors == '') return true;
                     $('#errorText').html(errors);
-                    $('#incorrectEMailModal').modal({show: true});
+                    $('#errorModal').modal({show: true});
                     e.preventDefault();
                 });
+
+                $('#loginForm').submit(function (e) {
+                    var errors = '';
+                    if ($('#loginUsername').val() == '') {
+                        errors += 'Введите имя пользователя!<br>';
+                    }
+                    if ($('#loginPassword').val() == '') {
+                        errors += 'Введите пароль!<br>';
+                    }
+                    if (errors == '') return true;
+                    $('#errorText').html(errors);
+                    $('#errorModal').modal({show: true});
+                    e.preventDefault();
+                })
             });
 
             function sortPaginationSwitch(column, direction, page) {
