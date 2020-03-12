@@ -27,22 +27,4 @@ class Controller
         return $this->renderLayout($body);
     }
 
-    public function addRow($user_name, $email, $content) {
-        App::$db->init();
-        App::$db->addRow($this->protectString($user_name), $this->protectString($email), $this->protectString($content));
-        App::$db->close();
-    }
-
-    public function performChanges() {
-        App::$db->init();
-        App::$db->performChanges();
-        App::$db->close();
-    }
-
-    function protectString($str) {
-        $str = str_replace('<', '&lt', $str);
-        $str = str_replace('>', '&gt', $str);
-        return ($str);
-    }
-
 }

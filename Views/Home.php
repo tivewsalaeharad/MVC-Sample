@@ -1,26 +1,9 @@
 <?php
-if (in_array($params[0], ['added', 'login', 'logout', 'denied', 'changed', 'updated'])) {
-    $column = $_SESSION['home_state']['column'];
-    $direction = $_SESSION['home_state']['direction'];
-    $page = $_SESSION['home_state']['page'];
-} else {
-    $column = array_shift($params);
-    $column = $column ? $column : 'user_name';
-    $direction = array_shift($params);
-    $direction = $direction ? $direction : 'ASC';
-    $page = array_shift($params);
-    $page = $page ? $page : 1;
-    $_SESSION['home_state'] = array(
-        'column' => $column,
-        'direction' => $direction,
-        'page' => $page
-    );
-}
-App::$db->init();
-$db_result = App::$db->getAllTasks($column, $direction);
-App::$db->close();
+$column = $_SESSION['home_state']['column'];
+$direction = $_SESSION['home_state']['direction'];
+$page = $_SESSION['home_state']['page'];
 
-$total_rows = count($db_result);
+$total_rows = count($params['data']);
 $max_page = ceil($total_rows/3);
 $admin = isset($_SESSION['logged_user']) && $_SESSION['logged_user']['login'] == 'admin';
 ?>
@@ -77,7 +60,7 @@ $admin = isset($_SESSION['logged_user']) && $_SESSION['logged_user']['login'] ==
   </thead>
   <tbody>
     <?php for ($n = 3*($page - 1); $n < 3 * $page && $n < $total_rows; $n++) : ?>
-        <?php $row = $db_result[$n]; ?>
+        <?php $row = $params['data'][$n]; ?>
         <tr>
             <td><?=$row['user_name']?></td>
             <td><?=$row['email']?></td>
@@ -119,7 +102,7 @@ $admin = isset($_SESSION['logged_user']) && $_SESSION['logged_user']['login'] ==
     </ul>
 </nav>
 <? endif; ?>
-<?php switch ($params[0]) {
+<?php switch ($params['message']) {
     case 'added':
         echo '<div class="alert alert-info" role="alert">Новая задача успешно добавлена</div>';
         break;

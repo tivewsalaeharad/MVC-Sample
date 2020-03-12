@@ -7,15 +7,10 @@ class EditTask extends \App\Controller
 
     public function edit($params){
         if (isset($_POST['submit'])) {
-            $_SESSION['edit_cache'] = [$_POST['id'] => array(
-                'user_name' => $this->protectString($_POST['user_name']),
-                'email' => $this->protectString($_POST['email']),
-                'content' => $this->protectString($_POST['content']),
-                'edited' => 1
-            )];
+            \Models\EditTaskModel::storeChanges($_POST['id'], $_POST['user_name'], $_POST['email'], $_POST['content']);
             $this->performIfAdmin();
         } else {
-            return $this->render('NewTask', $params);
+            return $this->render('NewTask', \Models\EditTaskModel::getOneTask($params[0]));
         }
     }
 
@@ -26,7 +21,7 @@ class EditTask extends \App\Controller
 
     private function performIfAdmin() {
         if(isset($_SESSION['logged_user']) && $_SESSION['logged_user']['login'] == 'admin') {
-            $this->performChanges();
+            \Models\EditTaskModel::performChanges();
             header('Location: /Home/index/changed');
         } else {
             if(isset($_SESSION['logged_user'])) unset($_SESSION['logged_user']);

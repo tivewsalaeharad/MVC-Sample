@@ -12,7 +12,7 @@ class Account extends \App\Controller
             } else {
                 $_SESSION['logged_user'] = ['login' => 'admin'];
                 if (isset($_SESSION['edit_cache'])) {
-                    $this->performChanges();
+                    \Models\EditTaskModel::performChanges();
                     header('Location: /Home/index/updated');
                 } else {
                     header('Location: /Home/index/login');
